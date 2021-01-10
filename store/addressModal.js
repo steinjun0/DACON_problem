@@ -41,7 +41,7 @@ export const actions = {
       "가상의 집주소1",
       "가상의 집주소2",
       "가상의 집주소3",
-      String(postalCode),
+      "PC: " + String(postalCode),
     ];
     commit("setPostItems", postItems);
   },

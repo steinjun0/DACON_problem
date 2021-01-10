@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <v-form v-model="signupValid">
+    <v-form ref="signupForm" v-model="signupValid">
       <v-list>
         <v-list-item>
           <v-text-field
@@ -41,6 +41,7 @@
                   color="primary"
                   v-bind="attrs"
                   v-on="on"
+                  @click="findPostItems(Number(user.postalCode))"
                 >
                   세부주소 찾기
                 </v-btn>
@@ -68,7 +69,6 @@
             label="비밀번호를 입력하세요"
             type="password"
             :rules="[(v) => !!v || '내용을 입력하세요.']"
-            lazy-validation
             v-model="user.password"
           >
           </v-text-field
@@ -79,9 +79,9 @@
             type="password"
             :rules="[
               (v) => !!v || '내용을 입력하세요.',
-              (v) => v === user.password || '비밀번호가 다릅니다!',
+              () => passwordCheckValid || '비밀번호가 다릅니다!',
             ]"
-            lazy-validation
+            v-model="passwordCheck"
           >
           </v-text-field
         ></v-list-item>
@@ -89,7 +89,7 @@
           ><v-btn
             :disabled="!signupValid || !postalValid || detailAddress === ''"
             :dark="signupValid && postalValid && detailAddress !== ''"
-            @click="sendUserInfo"
+            @click="checkValidation"
             color="success"
           >
             가입하기
@@ -97,6 +97,28 @@
         >
       </v-list>
     </v-form>
+    <v-textarea
+      v-if="!!this.$store.state.signup.user.id"
+      value="userInformation이 signup.js로 전달되었습니다."
+      readonly
+      rows="1"
+    ></v-textarea>
+    <v-textarea
+      v-if="!!this.$store.state.signup.user.id"
+      :value="
+        'id: ' +
+        this.$store.state.signup.user.id +
+        '\nnickname: ' +
+        this.$store.state.signup.user.nickname +
+        '\npostalCode: ' +
+        this.$store.state.signup.user.postalCode +
+        '\naddress: ' +
+        this.$store.state.signup.user.address +
+        '\npassword: ' +
+        this.$store.state.signup.user.password
+      "
+      readonly
+    ></v-textarea>
   </v-container>
 </template>
 
@@ -115,6 +137,7 @@ export default {
         address: "",
         password: "",
       },
+      passwordCheck: "",
       showAddressModal: false, // modal 창을 컨트롤 하는 변수
       signupValid: false,
       postalValid: false, // postalCode text-field의 rule에 따라 버튼 입력을 제한
@@ -130,12 +153,25 @@ export default {
     sendUserInfo: function () {
       this.$store.dispatch("signup/getUserInfo", this.user);
     },
+    checkValidation: function () {
+      console.log("it is changing1");
+      if (this.$refs.signupForm.validate()) {
+        this.sendUserInfo();
+      }
+    },
+    findPostItems: function (postalCode) {
+      this.$store.dispatch("addressModal/findPostItems", postalCode);
+    },
   },
   computed: {
     detailAddress: function () {
       return this.$store.state.addressModal.detailAddress;
     },
+    passwordCheckValid: function () {
+      return this.user.password === this.passwordCheck;
+    },
   },
+  watch: {},
 };
 </script>
 
