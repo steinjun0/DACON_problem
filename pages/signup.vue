@@ -165,6 +165,7 @@ export default {
   },
   computed: {
     detailAddress: function () {
+      this.user.address = this.$store.state.addressModal.detailAddress;
       return this.$store.state.addressModal.detailAddress;
     },
     passwordCheckValid: function () {
