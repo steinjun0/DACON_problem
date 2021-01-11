@@ -48,7 +48,6 @@
               </template>
               <address-modal
                 :showModal="showAddressModal"
-                :postalCode="Number(user.postalCode)"
                 @closeAddressModal="showAddressModal = false"
               ></address-modal>
             </v-dialog>
@@ -130,6 +129,8 @@ export default {
   },
   data: function () {
     return {
+      // 현재 영역에서 선언된 user는 화면에 보여주기 위한 값이며
+      // 실제로 데이터의 관리/사용은 signup.js에서 관리한다.
       user: {
         id: "",
         nickname: "",
@@ -150,24 +151,40 @@ export default {
     // text-field가 비었을 때 확인 버튼 입력을 제한하기 위해 추가
   },
   methods: {
+    // 입력받은 우편번호를 통해 세부 주소 목록을 로딩
+    // 세부주소 찾기 click event에 의존
+    // addressModal에 한해, 우편번호는 세부주소를 찾을 때만 사용되고
+    // 세부주소는 우편번호가 필수적이다.
+    // 따라서 별도의 sendPostalCode 함수를 작성하지 않고 findPostItems에서 함께 처리한다.
+    findPostItems: function (postalCode) {
+      this.$store.dispatch("addressModal/findPostItems", postalCode);
+    },
+
+    // 모든 validation을 만족하고 버튼이 click될 때, 데이터를 송신.
+    // 제출 click event에 의존
+    // ** 현재는 signup.js로 보내지만, 본 작업은 서버로 보내질 수도 있음을 상정하고 작업 **
     sendUserInfo: function () {
       this.$store.dispatch("signup/getUserInfo", this.user);
     },
+
+    // 제출 버튼을 click할 때, form .signupForm 내부의 validation rules를
+    // 모두 확인하고, true가 반환될 때, sendUserInfo를 실시한다.
+    // validate는 확인과 반환을 모두 시행한다.
     checkValidation: function () {
-      console.log("it is changing1");
       if (this.$refs.signupForm.validate()) {
         this.sendUserInfo();
       }
     },
-    findPostItems: function (postalCode) {
-      this.$store.dispatch("addressModal/findPostItems", postalCode);
-    },
   },
   computed: {
+    // 세부주소는 addressModal.js에서 관리한다.
+    // 또한 signupPage에서는 화면에 띄우는 작업 외에는 데이터가 필요하지 않으므로
+    // computed로 값을 받아온다.
     detailAddress: function () {
       this.user.address = this.$store.state.addressModal.detailAddress;
       return this.$store.state.addressModal.detailAddress;
     },
+    // vue.js의 공식문서 첫 번째 예제와 같이, 가독성을 올리기 위해 computed에 배치
     passwordCheckValid: function () {
       return this.user.password === this.passwordCheck;
     },
