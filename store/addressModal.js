@@ -22,11 +22,6 @@ export const mutations = {
   setDetailAddress: function (state, payload) {
     state.detailAddress = payload;
   },
-  addRoadName: function (state, payload) {
-    for (var i = 0; i < state.backupPostItems.length; i++) {
-      state.postItems[i] = payload + " " + state.backupPostItems[i];
-    }
-  },
 };
 
 export const actions = {
@@ -42,8 +37,11 @@ export const actions = {
         String(postalCode) + "의 주소2",
         String(postalCode) + "의 주소3",
         "PC: " + String(postalCode),
-      ];
+      ]; // 더미 데이터
+      // 얻은 데이터를 mutation->state로 저장
       commit("setPostItems", postItems);
+
+      // roadName 검색 기능을 더미 데이터를 백업함(추후 검색 기능 구현에 따라 삭제)
       commit("setBackupPostItems", postItems);
     }, 1000);
   },
