@@ -14,6 +14,7 @@ export const mutations = {
   },
   setPostItems: function (state, payload) {
     state.postItems = payload;
+    // console.log(state.postItems);
   },
   setBackupPostItems: function (state, payload) {
     state.backupPostItems = state.postItems.slice(); // 깊은 복사를 통해 백업 파일을 생성
@@ -52,7 +53,9 @@ export const actions = {
   // watch를 통해 입력받은 roadname을 기존 postItems를 변경
   // ** DB검색 상황을 상정했음을 다시 짚고 넘어간다.
   // ** 입력값이 연속적으로 등장하는 동작을 하나, 서버가 있다면
-  //    반환값을 조절하여 방지할 수 있다.
+  //    반환값을 조절하여 동작을 조절할 수 있다.
+  // ***  본 문제를 setTimeout을 통해 addressModal.vue에서 처리하려 했으나
+  //      computed가 반응하지 않는 현상이 발생함.
   getRoadName: function ({ commit, state }, roadName) {
     var postItems = [String(roadName) + "로 검색중"];
     commit("setPostItems", postItems);
@@ -60,7 +63,8 @@ export const actions = {
       for (var i = 0; i < state.backupPostItems.length; i++) {
         postItems[i] = roadName + " " + state.backupPostItems[i];
       }
+      console.log("finish find");
       commit("setPostItems", postItems);
-    }, 3000);
+    }, 2000);
   },
 };

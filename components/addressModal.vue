@@ -20,7 +20,14 @@
       </v-list-item-group>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="green darken-1" text @click="$emit('closeAddressModal')">
+        <v-btn
+          color="green darken-1"
+          text
+          @click="
+            $emit('closeAddressModal');
+            roadName = '';
+          "
+        >
           취소
         </v-btn>
         <v-btn
@@ -29,6 +36,7 @@
           @click="
             $emit('closeAddressModal');
             sendAddressInfo();
+            roadName = '';
           "
           :disabled="selectedItem === undefined"
         >
@@ -51,11 +59,11 @@ export default {
   },
   data: function () {
     return {
-      selectedItem: 0,
+      selectedItem: undefined,
       roadName: "",
+      roadNameBefore: "",
     };
   },
-
   methods: {
     // 선택한 세부주소를 addressModal.js(vuex)로 전달하여
     // 관리할 수 있는 데이터로 사용한다.
@@ -67,11 +75,11 @@ export default {
         this.postItems[this.selectedItem]
       );
     },
+    sendRoadName: function () {},
   },
   computed: {
     // computed로 데이터를 확인하고, 동일한 postItem일 경우 cache된 데이터를 사용할 수 있다.
     postItems: function () {
-      console.log("it does work");
       return this.$store.state.addressModal.postItems;
     },
     // 코드 가독성을 높이기 위해 computed를 사용
@@ -83,7 +91,23 @@ export default {
     // ** 입력에 따른 DB검색 작업을 상정하고 코드를 작성
     // 입력되는 roadname이 변경될 때 마다, addressModal에 새로이 신호와 roadname을 보낸다.
     roadName: function () {
-      this.$store.dispatch("addressModal/getRoadName", this.roadName);
+      var roadNameNow = this.roadName;
+      setTimeout(() => {
+        this.roadNameBefore = roadNameNow;
+      }, 0);
+    },
+    // 단어단위가 아니라, 음소단위로 검색요청이 실행되어,
+    // 현재의 입력이 roadname의 timeout시간 전의 입력과 같을 때, 요청을 전달하도록 한다.
+    // ** 현재 setTimeout 시간을 늘리면 computed의 postItem이 새로고침되지 않는 일이 일어난다.
+    roadNameBefore: function () {
+      console.log("roadNameBefore changed");
+
+      console.log(this.roadNameBefore);
+      console.log(this.roadName);
+      if (this.roadNameBefore === this.roadName) {
+        console.log("send!!");
+        this.$store.dispatch("addressModal/getRoadName", this.roadName);
+      }
     },
   },
 };
